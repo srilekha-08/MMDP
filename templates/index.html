@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="sidebar">
+            <h4 class="text-center text-primary mb-4">
+                <i class="fas fa-upload me-2"></i>File Upload
+            </h4>
+            <hr>
+
+            <!-- File Upload Section -->
+            <h5><i class="fas fa-file-alt me-2"></i>Upload Documents</h5>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="upload-area mb-3">
+                    <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                    <p>Drag & drop files here or click to browse</p>
+                    <input type="file" id="fileInput" name="files" multiple
+                           accept=".pdf,.docx,.pptx,.txt,.md,.png,.jpg,.jpeg,.mp3,.mp4"
+                           class="form-control" style="display: none;">
+                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('fileInput').click()">
+                        Choose Files
+                    </button>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-3" id="processBtn">
+                    <i class="fas fa-rocket me-2"></i>Process All Files
+                </button>
+            </form>
+
+            <div id="uploadProgress" class="mb-3" style="display: none;">
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+                <p class="text-center mt-2" id="progressText">Processing...</p>
+            </div>
+
+            <hr>
+
+            <!-- YouTube Section -->
+            <h5><i class="fab fa-youtube me-2"></i>YouTube Video</h5>
+            <form id="youtubeForm">
+                <div class="mb-3">
+                    <input type="url" class="form-control" id="youtubeUrl" name="url"
+                           placeholder="https://www.youtube.com/watch?v=..." required>
+                </div>
+                <button type="submit" class="btn btn-danger w-100 mb-3" id="youtubeBtn">
+                    <i class="fab fa-youtube me-2"></i>Process YouTube
+                </button>
+            </form>
+
+            <hr>
+
+            <!-- Database Info -->
+            <h5><i class="fas fa-database me-2"></i>Database Info</h5>
+            <div class="info-box">
+                <strong>Documents:</strong> <span id="docCount">{{ doc_count }}</span><br>
+                <strong>Files:</strong> <span id="fileCount">{{ processed_files|length }}</span>
+            </div>
+
+            <button class="btn btn-outline-danger w-100" onclick="clearDatabase()">
+                <i class="fas fa-trash me-2"></i>Clear Database
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-8">
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="chat-tab" data-bs-toggle="tab" data-bs-target="#chat"
+                        type="button" role="tab" aria-controls="chat" aria-selected="true">
+                    <i class="fas fa-comments me-2"></i>Chat
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files"
+                        type="button" role="tab" aria-controls="files" aria-selected="false">
+                    <i class="fas fa-folder me-2"></i>Files
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="help-tab" data-bs-toggle="tab" data-bs-target="#help"
+                        type="button" role="tab" aria-controls="help" aria-selected="false">
+                    <i class="fas fa-question-circle me-2"></i>Help
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Chat Tab -->
+            <div class="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat-tab">
+                <div class="main-header">
+                    <i class="fas fa-comments me-2"></i>Chat with Your Documents
+                </div>
+
+                <div id="chatContainer" class="mb-3" style="height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px; padding: 1rem;">
+                    {% for message in chat_history %}
+                    <div class="chat-message {{ message.role }}">
+                        <strong>{{ message.role.title() }}:</strong> {{ message.content }}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <form id="chatForm">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="chatInput" placeholder="Ask anything..." required>
+                        <button class="btn btn-primary" type="submit">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Files Tab -->
+            <div class="tab-pane fade" id="files" role="tabpanel" aria-labelledby="files-tab">
+                <div class="main-header">
+                    <i class="fas fa-folder me-2"></i>Processed Files
+                </div>
+
+                <div id="filesContainer">
+                    {% if processed_files %}
+                        {% for file_info in processed_files|reverse %}
+                        <div class="file-item {{ 'success-box' if file_info.status == 'success' else 'error-box' }}">
+                            <strong>
+                                <i class="fas fa-{{ 'check-circle' if file_info.status == 'success' else 'times-circle' }} me-2"></i>
+                                {{ file_info.name }}
+                            </strong><br>
+                            {{ file_info.message }}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="info-box">
+                            <strong><i class="fas fa-info-circle me-2"></i>No files yet</strong><br>
+                            Upload files to get started!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Help Tab -->
+            <div class="tab-pane fade" id="help" role="tabpanel" aria-labelledby="help-tab">
+                <div class="main-header">
+                    <i class="fas fa-question-circle me-2"></i>How to Use
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-rocket me-2"></i>Quick Start</h4>
+                        <ol>
+                            <li><strong>Upload Files</strong> - Use sidebar to upload documents/images/videos</li>
+                            <li><strong>Process</strong> - Click "Process All Files"</li>
+                            <li><strong>Ask Questions</strong> - Go to Chat tab and ask anything!</li>
+                        </ol>
+
+                        <h4 class="mt-4"><i class="fas fa-lightbulb me-2"></i>Tips</h4>
+                        <ul>
+                            <li>Upload clear, readable files</li>
+                            <li>Ask specific questions</li>
+                            <li>Be patient with large files</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h4><i class="fas fa-file-alt me-2"></i>Supported Files</h4>
+                        <ul>
+                            <li><strong>Documents:</strong> PDF, Word, PowerPoint, Text, Markdown</li>
+                            <li><strong>Images:</strong> PNG, JPG, JPEG</li>
+                            <li><strong>Audio:</strong> MP3</li>
+                            <li><strong>Video:</strong> MP4</li>
+                            <li><strong>YouTube:</strong> Direct URLs</li>
+                        </ul>
+
+                        <h4 class="mt-4"><i class="fas fa-trash me-2"></i>Clear Data</h4>
+                        <p>Use "Clear Database" in sidebar to reset everything.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr class="mt-5">
+<div class="text-center text-muted">
+    <small><i class="fas fa-robot me-1"></i>Multimodal Data Processing System</small>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let chatHistory = {{ chat_history|tojson }};
+let processedFiles = {{ processed_files|tojson }};
+
+function updateUI() {
+    document.getElementById('docCount').textContent = '{{ doc_count }}';
+    document.getElementById('fileCount').textContent = processedFiles.length;
+}
+
+function showAlert(message, type = 'info') {
+    const alertClass = `alert alert-${type} alert-dismissible fade show`;
+    const alert = `
+        <div class="${alertClass}" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    document.querySelector('.container').insertAdjacentHTML('afterbegin', alert);
+    setTimeout(() => {
+        document.querySelector('.alert').remove();
+    }, 5000);
+}
+
+// File Upload Handling
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const files = formData.getAll('files');
+
+    if (files.length === 0) {
+        showAlert('Please select files to upload', 'warning');
+        return;
+    }
+
+    const processBtn = document.getElementById('processBtn');
+    const progressDiv = document.getElementById('uploadProgress');
+    const progressBar = progressDiv.querySelector('.progress-bar');
+    const progressText = document.getElementById('progressText');
+
+    processBtn.disabled = true;
+    processBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    progressDiv.style.display = 'block';
+
+    try {
+        const response = await fetch('/api/process_files', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showAlert(`Successfully processed ${result.processed_count}/${files.length} files`, 'success');
+            // Refresh the page to update UI
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showAlert('Error processing files: ' + result.error, 'danger');
+        }
+    } catch (error) {
+        showAlert('Network error: ' + error.message, 'danger');
+    } finally {
+        processBtn.disabled = false;
+        processBtn.innerHTML = '<i class="fas fa-rocket me-2"></i>Process All Files';
+        progressDiv.style.display = 'none';
+    }
+});
+
+// YouTube Processing
+document.getElementById('youtubeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const url = formData.get('url');
+
+    const youtubeBtn = document.getElementById('youtubeBtn');
+    youtubeBtn.disabled = true;
+    youtubeBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+    try {
+        const response = await fetch('/api/process_youtube', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            showAlert(result.message, 'success');
+            setTimeout(() => window.location.reload(), 1000);
+        } else {
+            showAlert('Error: ' + result.error, 'danger');
+        }
+    } catch (error) {
+        showAlert('Network error: ' + error.message, 'danger');
+    } finally {
+        youtubeBtn.disabled = false;
+        youtubeBtn.innerHTML = '<i class="fab fa-youtube me-2"></i>Process YouTube';
+    }
+});
+
+// Chat Handling
+document.getElementById('chatForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const input = document.getElementById('chatInput');
+    const message = input.value.trim();
+
+    if (!message) return;
+
+    // Add user message to chat
+    addChatMessage('user', message);
+    input.value = '';
+
+    // Show typing indicator
+    const chatContainer = document.getElementById('chatContainer');
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'chat-message assistant';
+    typingDiv.innerHTML = '<strong>Assistant:</strong> <i>Thinking...</i>';
+    typingDiv.id = 'typingIndicator';
+    chatContainer.appendChild(typingDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    try {
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ message: message })
+        });
+
+        const result = await response.json();
+
+        // Remove typing indicator
+        document.getElementById('typingIndicator').remove();
+
+        if (result.success) {
+            addChatMessage('assistant', result.response);
+        } else {
+            addChatMessage('assistant', 'Error: ' + result.error);
+        }
+    } catch (error) {
+        document.getElementById('typingIndicator').remove();
+        addChatMessage('assistant', 'Network error: ' + error.message);
+    }
+});
+
+function addChatMessage(role, content) {
+    const chatContainer = document.getElementById('chatContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `chat-message ${role}`;
+    messageDiv.innerHTML = `<strong>${role.charAt(0).toUpperCase() + role.slice(1)}:</strong> ${content}`;
+    chatContainer.appendChild(messageDiv);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+    chatHistory.push({ role: role, content: content });
+}
+
+function clearDatabase() {
+    if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+        fetch('/api/clear_database', { method: 'POST' })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showAlert('Database cleared successfully', 'success');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showAlert('Error clearing database', 'danger');
+                }
+            })
+            .catch(error => {
+                showAlert('Network error: ' + error.message, 'danger');
+            });
+    }
+}
+
+// Initialize
+updateUI();
+</script>
+{% endblock %}

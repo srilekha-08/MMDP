@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Multimodal Data Processor{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .main-header {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2196F3;
+            text-align: center;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .btn-primary {
+            background-color: #2196F3 !important;
+            border-color: #1976D2 !important;
+        }
+        .btn-primary:hover {
+            background-color: #1976D2 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .success-box {
+            padding: 1.2rem;
+            border-radius: 8px;
+            background-color: #d4edda;
+            border-left: 6px solid #28a745;
+            margin: 0.8rem 0;
+            color: #155724;
+            font-weight: 500;
+            font-size: 1.05rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .error-box {
+            padding: 1.2rem;
+            border-radius: 8px;
+            background-color: #f8d7da;
+            border-left: 6px solid #dc3545;
+            margin: 0.8rem 0;
+            color: #721c24;
+            font-weight: 500;
+            font-size: 1.05rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            padding: 1.2rem;
+            border-radius: 8px;
+            background-color: #d1ecf1;
+            border-left: 6px solid #17a2b8;
+            margin: 0.8rem 0;
+            color: #0c5460;
+            font-weight: 500;
+            font-size: 1.05rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .sidebar {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chat-message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+        .chat-message.user {
+            background-color: #e3f2fd;
+            margin-left: 2rem;
+        }
+        .chat-message.assistant {
+            background-color: #f5f5f5;
+            margin-right: 2rem;
+        }
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            border-color: #2196F3;
+            background-color: #f8f9ff;
+        }
+        .progress {
+            height: 25px;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-robot me-2"></i>Multimodal Data Processor
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#chat"><i class="fas fa-comments me-1"></i>Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#files"><i class="fas fa-folder me-1"></i>Files</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#help"><i class="fas fa-question-circle me-1"></i>Help</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

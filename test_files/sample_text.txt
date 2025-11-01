@@ -1,0 +1,9 @@
+﻿This is a sample text file for testing the Multimodal Data Processing System.
+
+Key Features:
+- Natural language processing
+- Document analysis
+- AI-powered Q&A system
+
+This file tests plain text (.txt) processing capabilities.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
